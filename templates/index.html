@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Meteo Dashboard (Live)</h1>
+
+<canvas id="tempChart"></canvas>
+<canvas id="humChart"></canvas>
+<canvas id="presChart"></canvas>
+
+<script>
+const tempChart = new Chart(document.getElementById('tempChart').getContext('2d'), {
+    type: 'line',
+    data: { labels: [], datasets: [{ label: 'Temperatura (°C)', data: [], borderColor: 'red', fill: false }] }
+});
+const humChart = new Chart(document.getElementById('humChart').getContext('2d'), {
+    type: 'line',
+    data: { labels: [], datasets: [{ label: 'Umidità (%)', data: [], borderColor: 'blue', fill: false }] }
+});
+const presChart = new Chart(document.getElementById('presChart').getContext('2d'), {
+    type: 'line',
+    data: { labels: [], datasets: [{ label: 'Pressione (hPa)', data: [], borderColor: 'green', fill: false }] }
+});
+
+async function aggiornaGrafici() {
+    const response = await fetch('/api/dati');
+    const data = await response.json();
+
+    tempChart.data.labels = data.labels;
+    tempChart.data.datasets[0].data = data.temperatures;
+    tempChart.update();
+
+    humChart.data.labels = data.labels;
+    humChart.data.datasets[0].data = data.humidities;
+    humChart.update();
+
+    presChart.data.labels = data.labels;
+    presChart.data.datasets[0].data = data.pressures;
+    presChart.update();
+}
+
+setInterval(aggiornaGrafici, 5000);
+aggiornaGrafici();
+</script>
+{% endblock %}
